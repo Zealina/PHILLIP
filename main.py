@@ -2,7 +2,13 @@
 """Entry point into the bot"""
 
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
+from telegram.ext import (
+        ApplicationBuilder,
+        CommandHandler,
+        ContextTypes,
+        MessageHandler,
+        filters
+    )
 from bot.utils.env import BOT_TOKEN
 from bot.handlers.start import start_handler
 from bot.handlers.group import chat_member_handler, list_groups, select_group
@@ -10,6 +16,7 @@ from bot.handlers.unknown import unknown_handler
 from bot.handlers.persistence import persistence
 from bot.handlers.topic import topic_handler
 from bot.handlers.update_handler import update_handler
+from bot.handlers.file_handler import file_handler
 from telegram.constants import ParseMode
 
 
@@ -88,8 +95,9 @@ application.add_handler(chat_member_handler)
 application.add_handler(list_groups)
 application.add_handler(select_group)
 application.add_handler(vision_handler)
-application.add_handler(unknown_handler)
 application.add_handler(topic_handler)
+application.add_handler(MessageHandler(filters.ATTACHMENT, file_handler))
+application.add_handler(unknown_handler)
 application.add_handler(update_handler)
 
 
