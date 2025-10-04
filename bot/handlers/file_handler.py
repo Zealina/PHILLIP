@@ -3,6 +3,7 @@ import asyncio
 import os
 from telegram import Update, Poll
 from telegram.ext import ContextTypes
+from telegram.constants import ParseMode
 from ai_questioner.generate import run_generator
 from werkzeug.utils import secure_filename
 
@@ -20,10 +21,13 @@ async def file_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     tg_file = await context.bot.get_file(update.message.document.file_id)
     await tg_file.download_to_drive(custom_path=file_path)
+    question_count = 0
 
-    async for result in run_generator(file_path):
-        for entry in result:
-            try:
+    try:
+        async for result in run_generator(file_path):
+            for entry in result:
+                if not entry:
+                    continue
                 await update.message.reply_poll(
                     question=entry.get("question"),
                     options=entry.get("options"),
@@ -31,6 +35,8 @@ async def file_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     correct_option_id=entry.get("correct_option"),
                     explanation=entry.get("explanation")
                 )
-            except Exception as e:
-                pass
+                question_count += 1
             await asyncio.sleep(2.1)
+        await update.message.reply_text(text=f'Summary: *{question_count}* questions added', parse_mode=ParseMode.MARKDOWN)
+    except Exception as e:
+        await update.message.reply_text(text=f'_⚠️ Error: {e}_', parse_mode=ParseMode.MARKDOWN)

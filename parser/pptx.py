@@ -1,61 +1,52 @@
 #!/usr/bin/env python3
-"""
-Convert a .pptx PowerPoint file to a .txt file.
-Preserves the order of content: titles, paragraphs, and tables.
-"""
-
+"""Extract text from a .pptx PowerPoint file"""
 import os
-from sys import argv
 from pptx import Presentation
 
 
-def extract_table(table):
-    """Return table text as list of rows (strings)."""
-    rows = []
+def extract_table_text(table):
+    """Yield each row of a table as a formatted string."""
     for row in table.rows:
-        cell_texts = [cell.text.strip() for cell in row.cells]
-        rows.append(" | ".join(cell_texts))
-    return rows
+        cells = [cell.text.strip() for cell in row.cells if cell.text.strip()]
+        if cells:
+            yield " | ".join(cells)
 
 
-def pptx_to_txt(pptx_path):
+def extract_text(pptx_path):
+    """
+    Yield text chunks slide-by-slide from a PowerPoint presentation.
+
+    Args:
+        pptx_path (str): Path to the .pptx file
+    """
     if not pptx_path.lower().endswith(".pptx"):
-        raise ValueError("Only .pptx files are supported.")
+        raise ValueError("Input file must be a .pptx file")
 
     prs = Presentation(pptx_path)
-    base_name = os.path.splitext(os.path.basename(pptx_path))[0]
-    output_file = f"{base_name}.txt"
 
-    with open(output_file, "w", encoding="utf-8") as out:
-        for slide_num, slide in enumerate(prs.slides, start=1):
-            out.write(f"\n--- Slide {slide_num} ---\n\n")
+    for slide_num, slide in enumerate(prs.slides, start=1):
+        content_parts = [f"--- Slide {slide_num} ---"]
+        for shape in slide.shapes:
+            if not shape.has_text_frame and not shape.has_table:
+                continue
 
-            for shape in slide.shapes:
-                if not shape.has_text_frame and not shape.has_table:
-                    continue
+            if shape.has_text_frame:
+                for para in shape.text_frame.paragraphs:
+                    text = para.text.strip()
+                    if text:
+                        content_parts.append(text)
 
-                # Text (titles, bullets, etc.)
-                if shape.has_text_frame:
-                    for para in shape.text_frame.paragraphs:
-                        text = para.text.strip()
-                        if text:
-                            out.write(text + "\n")
+            if shape.has_table:
+                for line in extract_table_text(shape.table):
+                    content_parts.append(line)
 
-                # Table
-                if shape.has_table:
-                    table = shape.table
-                    table_text = extract_table(table)
-                    for row in table_text:
-                        out.write(row + "\n")
-                    out.write("\n")
+        if slide.has_notes_slide:
+            notes_slide = slide.notes_slide
+            if notes_slide and notes_slide.notes_text_frame:
+                note_text = notes_slide.notes_text_frame.text.strip()
+                if note_text:
+                    content_parts.append(f"[Notes] {note_text}")
 
-    print(f"Conversion complete: {output_file}")
-
-
-if __name__ == "__main__":
-    if len(argv) < 2:
-        print("Usage: ./pptx_to_txt.py <your_file.pptx>")
-        exit(1)
-
-    pptx_to_txt(argv[1])
-
+        slide_text = "\n".join(content_parts).strip()
+        if slide_text:
+            yield f"{slide_text}\n(Slide {slide_num})"

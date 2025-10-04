@@ -12,11 +12,10 @@ load_dotenv()
 
 
 class QuestionSchema(BaseModel):
-    question: str
-    options: List
-    correct_option: int
-    explanation: str
-
+    question: str 
+    options: List[str] 
+    correct_option: int 
+    explanation: str 
 
 class QuestionListSchema(RootModel[List[QuestionSchema]]):
     pass
@@ -26,15 +25,21 @@ client = genai.Client()
 
 async def generate_mcqs(text: str) -> list[dict]:
     """Async generator for MCQs from a given text"""
-
     prompt = f"""
-    Source text: {text}
+    You are a medical exam question generator.
+    Below is a document chunk extracted from a lecture note.
 
-    Generate 3-5 MCQs in the exact JSON format.
-    Tne explanation should have the page number included in it
-    The explanation should not be more than 100 characters
-    The question should not be more than 255 characters
-    The options should each not be more than 100 characters
+    Document_Chunk:
+    {text}
+
+    Your task:
+    - Generate 3 to 5 multiple-choice questions (MCQs) in valid JSON format only.
+
+    Guidelines:
+    - Every explanation must include the **page number** where the information came from
+    - Ensure all questions are factually derived from the chunk.
+    - If the chunk contains irrelevant content (e.g., references, acknowledgments, Title page) return empty list .
+    - If the chunk is **too short** or lacks enough context to generate 3 questions, return **only one valid question**.
     """
 
     response = await client.aio.models.generate_content(

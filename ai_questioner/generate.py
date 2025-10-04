@@ -8,8 +8,6 @@ from typing import Dict
 
 
 LIMIT = 10
-
-
 async def run_generator(filename: str):
     """Get the questions from the API"""
     extractor = get_extractor(filename)
@@ -25,13 +23,22 @@ async def run_generator(filename: str):
             yield result
         await asyncio.sleep(61)
 
-
 def randomize_options(data: Dict):
     """Randomize the options in the dictionary"""
-    if not data.get("options"):
-        raise ValueError("No OPTIONS in data")
-    if not data.get("correct_option"):
-        raise ValueError("Correct OPTION is not set")
+    if not data or data.get("options") is None:
+        return None
+    if data.get("correct_option") is None:
+        data["correct_option"] = 0
+
+    options = data["options"]
+    new_options = []
+    for option in options:
+        new_options.append(option[:100])
+    data["options"] = new_options
+
+    question = data.get("question")
+    if question:
+        data["question"] = question[:255]
 
     correct_option = data["options"][data["correct_option"]]
     random.shuffle(data["options"])
