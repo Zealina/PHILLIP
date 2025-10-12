@@ -16,7 +16,7 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 OWNER_ID = os.getenv("OWNER_ID")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
-WEBHOOK_PORT = int(os.getenv("WEBHOOK_PORT"))
+WEBHOOK_PORT = os.getenv("WEBHOOK_PORT")
 
 if not BOT_TOKEN:
     raise ValueError("BOT_TOKEN is missing from env!")

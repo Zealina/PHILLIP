@@ -36,12 +36,13 @@ async def generate_mcqs(text: str) -> list[dict]:
     - Generate 2 multiple-choice questions (MCQs) in valid JSON format only.
 
     Guidelines:
-    - Ensure the questions are shorter than 250 characters
-    - Try to avoid "which of the following..." and "What.." questions
-    - Every explanation must include the page number where the information came from
+    - Ensure the number of characters in each question is less than 250 characters
+    - Every explanation must include the **page number** where the information came from
+    - Try to avoid asking "what" or "which of the following questions"
     - Ensure all questions are factually derived from the chunk.
-    - If the chunk contains irrelevant content (e.g., references, acknowledgments, Title page) return empty list .
-    - If the chunk is too short or lacks enough context, return empty list.
+    - If the chunk contains irrelevant content
+    (e.g., references, acknowledgments, Title page)return empty list .
+    - If the chunk is too short or lacks enough context return empty list.
     """
 
     response = await client.aio.models.generate_content(
@@ -50,7 +51,7 @@ async def generate_mcqs(text: str) -> list[dict]:
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=QuestionListSchema,
-            temperature=0.6
+            temperature=0.7
         )
     )
 
