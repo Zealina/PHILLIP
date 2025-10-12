@@ -2,4 +2,7 @@ pymupdf
 google-genai
 python-pptx
 python-docx
-unoserver
+flask
+uvicorn
+asgiref
+python-dotenv
