@@ -6,3 +6,4 @@ flask
 uvicorn
 asgiref
 python-dotenv
+python-telegram-bot
