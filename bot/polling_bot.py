@@ -1,11 +1,7 @@
 #!/usr/bin/env python3
 """Entry point into the bot"""
 
-import asyncio
 import logging
-from flask import Flask, Response, make_response, request
-from http import HTTPStatus
-from asgiref.wsgi import WsgiToAsgi
 from telegram import Update
 from telegram.ext import (
     ApplicationBuilder,
@@ -14,10 +10,8 @@ from telegram.ext import (
     filters,
     ContextTypes
 )
-import uvicorn
-from bot.utils.env import BOT_TOKEN, WEBHOOK_URL, WEBHOOK_PORT
+from bot.utils.env import BOT_TOKEN
 from bot.handlers.start import start_handler
-from bot.handlers.file_handler import file_handler
 
 
 logging.basicConfig(
@@ -36,6 +30,15 @@ async def vision_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(VISION_TEXT, parse_mode='Markdown')
 
 
+async def file_handler(update, context):
+    topic = ""
+    if update.message.is_topic_message:
+        topic = update.message.reply_to_message.forum_topic_created.name
+    import json
+    print(json.dumps(update.to_dict(), indent=2))
+    print(topic)
+
+
 application = ApplicationBuilder().token(BOT_TOKEN).build()
 
 application.add_handler(start_handler)
@@ -43,30 +46,6 @@ application.add_handler(CommandHandler('vision', vision_handler))
 application.add_handler(MessageHandler(filters.Document.ALL, file_handler))
 
 
-flask_app = Flask(__name__)
-
-
-@flask_app.post("/telegram")
-async def telegram():
-    await application.update_queue.put(Update.de_json(data=request.json, bot=application.bot))
-    return Response(status=HTTPStatus.OK)
-
-@flask_app.get("/healthcheck")
-async def healthcheck():
-    return make_response("✅ Bot is alive and kicking", HTTPStatus.OK)
-
-async def main():
-    await application.bot.set_webhook(
-        url=f"{WEBHOOK_URL}/telegram",
-        allowed_updates=Update.ALL_TYPES,
-    )
-    server = uvicorn.Server(
-        config=uvicorn.Config(app=WsgiToAsgi(flask_app), host="0.0.0.0", port=WEBHOOK_PORT)
-    )
-    async with application:
-        await application.start()
-        await server.serve()
-        await application.stop()
-
 if __name__ == "__main__":
-    asyncio.run(main())
+    print("Bot is running...")
+    application.run_polling()

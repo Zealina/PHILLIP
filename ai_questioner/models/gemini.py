@@ -23,14 +23,14 @@ class QuestionListSchema(RootModel[List[QuestionSchema]]):
 client = genai.Client()
 
 
-async def generate_mcqs(text: str) -> list[dict]:
+async def generate_mcqs(text: str, topic: str) -> list[dict]:
     """Async generator for MCQs from a given text"""
     prompt = f"""
     You are a medical exam question generator.
     Below is a document chunk extracted from a lecture note.
 
-    Document_Chunk:
-    {text}
+    Topic: {topic}
+    Document_Chunk: ...{text}
 
     Your task:
     - Generate 2 multiple-choice questions (MCQs) in valid JSON format only.
@@ -50,7 +50,7 @@ async def generate_mcqs(text: str) -> list[dict]:
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=QuestionListSchema,
-            temperature=0.6
+            temperature=0.7
         )
     )
 
