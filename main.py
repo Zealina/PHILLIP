@@ -18,6 +18,7 @@ import uvicorn
 from bot.utils.env import BOT_TOKEN, WEBHOOK_URL, WEBHOOK_PORT
 from bot.handlers.start import start_handler
 from bot.handlers.file_handler import file_handler
+from bot.handlers.per_page_handler import per_page_handler
 
 
 logging.basicConfig(
@@ -41,7 +42,7 @@ application = ApplicationBuilder().token(BOT_TOKEN).build()
 application.add_handler(start_handler)
 application.add_handler(CommandHandler('vision', vision_handler))
 application.add_handler(MessageHandler(filters.Document.ALL, file_handler))
-
+application.add_handler(per_page_handler)
 
 flask_app = Flask(__name__)
 

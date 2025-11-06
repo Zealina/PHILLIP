@@ -1,6 +1,7 @@
 """Handle Uploaded files"""
 import asyncio
 import os
+import bot.handlers.per_page_handler as pp_handler
 from telegram import Update, Poll
 from telegram.ext import ContextTypes
 from telegram.constants import ParseMode
@@ -13,7 +14,6 @@ UPLOAD_DIR = "uploads/"
 
 async def file_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Convert document files e.g .pdf, .pptx, .docx to questions"""
-    print(update)
     os.makedirs(UPLOAD_DIR, exist_ok=True)
 
     unsafe_name = update.message.document.file_name
@@ -24,11 +24,11 @@ async def file_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await tg_file.download_to_drive(custom_path=file_path)
     question_count = 0
 
-    topic = "<unspecified>"
+    topic = ""
     if update.message.is_topic_message:
         topic = update.message.reply_to_message.forum_topic_created.name
 
-    async for result in run_generator(file_path, topic):
+    async for result in run_generator(file_path, topic, pp_handler.per_page):
         for entry in result:
             if not entry:
                 continue

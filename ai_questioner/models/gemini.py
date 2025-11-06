@@ -23,34 +23,29 @@ class QuestionListSchema(RootModel[List[QuestionSchema]]):
 client = genai.Client()
 
 
-async def generate_mcqs(text: str, topic: str) -> list[dict]:
+async def generate_mcqs(text: str, topic: str, per_chunk: int) -> list[dict]:
     """Async generator for MCQs from a given text"""
+    topic_text = f"Topic: {topic}"
     prompt = f"""
-    You are a medical exam question generator.
-    Below is a document chunk extracted from a lecture note.
-
-    Topic: {topic}
-    Document_Chunk: ...{text}
-
-    Your task:
-    - Generate 2 multiple-choice questions (MCQs) in valid JSON format only.
+    Generate {per_chunk} mcqs to test the understanding of resident doctors
+    {topic_text if topic else ""}
+    Document_Chunk: {text}
 
     Guidelines:
     - Ensure the questions are shorter than 250 characters
-    - Try to avoid "which of the following..." and "What.." questions
-    - Every explanation must include the page number where the information came from
-    - Ensure all questions are factually derived from the chunk.
-    - If the chunk contains irrelevant content (e.g., references, acknowledgments, Title page) return empty list .
-    - If the chunk is too short or lacks enough context, return empty list.
+    - Be creative as a standard body of exam like USMLE, PLAB, NCLEX
+    - Add your own twist to the questions based on your knowledge of the topic
+    - Ask questions to cover blind spots in the document as well
+    - Every explanation must include the page number, for reference
+    - If the chunk lacks enough context, return empty list.
     """
-
     response = await client.aio.models.generate_content(
         model="gemini-2.5-flash",
         contents=prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             response_schema=QuestionListSchema,
-            temperature=0.7
+            temperature=0.8
         )
     )
 
