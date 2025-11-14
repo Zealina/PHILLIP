@@ -32,6 +32,7 @@ async def generate_mcqs(text: str, topic: str, per_chunk: int) -> list[dict]:
     Document_Chunk: {text}
 
     Guidelines:
+    - correct_options must use zero-based indexing
     - Ensure the questions are shorter than 250 characters
     - Be creative as a standard body of exam like USMLE, PLAB, NCLEX
     - Add your own twist to the questions based on your knowledge of the topic
