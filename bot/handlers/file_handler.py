@@ -35,7 +35,7 @@ async def file_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             try:
                 question = entry.get("question")
                 await update.message.reply_poll(
-                    question=f"{question_count + 1}. {question}",
+                    question=question,
                     options=entry.get("options"),
                     type=Poll.QUIZ,
                     correct_option_id=entry.get("correct_option"),
