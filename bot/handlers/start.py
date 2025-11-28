@@ -13,7 +13,7 @@ from bot.utils.verify import restricted
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Respond to the start command"""
     text = (
-        f"*Boss man {update.effective_user.username}, Welcome to _The Equator_, PHILLIP reporting for duty.*\n\n"
+        f"*Boss man {update.effective_user.username}, Welcome, PHILLIP reporting for duty.*\n\n"
         "_Standing by for your orders...Captain_ 🫡"
     )
     await context.bot.send_message(chat_id=update.effective_chat.id, text=text, parse_mode=ParseMode.MARKDOWN)
