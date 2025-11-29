@@ -27,17 +27,15 @@ async def generate_mcqs(text: str, topic: str, per_chunk: int) -> list[dict]:
     """Async generator for MCQs from a given text"""
     topic_text = f"Topic: {topic}"
     prompt = f"""
-    Generate {per_chunk} mcqs to test the understanding
+    You are a pharmacology questioner, Generate {per_chunk} mcqs to test the understanding of students
     {topic_text if topic else ""}
-    Document_Chunk: {text}
+    {text}
 
     Guidelines:
     - correct_options must use zero-based indexing
     - Ensure the questions are shorter than 250 characters
-    - Be clear with the questions and precise
-    - Add your own twist to the questions based on your knowledge of the topic
+    - Be precise with questions, no adding extra context
     - Ask questions to cover blind spots in the document as well
-    - Every explanation must include the page number, for reference
     - If the chunk lacks enough context, return empty list.
     """
     response = await client.aio.models.generate_content(
