@@ -7,7 +7,7 @@ from ai_questioner.models import gemini
 from typing import Dict
 
 
-LIMIT = 9
+LIMIT = 4
 async def run_generator(filename: str, topic: str, per_page: int):
     """Get the questions from the API"""
     extractor = get_extractor(filename)
