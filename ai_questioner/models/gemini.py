@@ -27,7 +27,7 @@ async def generate_mcqs(text: str, topic: str, per_chunk: int) -> list[dict]:
     """Async generator for MCQs from a given text"""
     topic_text = f"Topic: {topic}"
     prompt = f"""
-    You are a pharmacology questioner, Generate {per_chunk} mcqs to test the understanding of students
+    You are a consultant O & G, Generate {per_chunk} mcqs to test the understanding of students
     {topic_text if topic else ""}
     {text}
 

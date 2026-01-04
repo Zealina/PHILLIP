@@ -33,7 +33,7 @@ async def file_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             if not entry:
                 continue
             try:
-                question = entry.get("question")
+                question = f"{question_count}. " + entry.get("question")
                 await update.message.reply_poll(
                     question=question,
                     options=entry.get("options"),
