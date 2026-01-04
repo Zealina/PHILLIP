@@ -7,7 +7,7 @@ from ai_questioner.models import gemini
 from typing import Dict
 
 
-LIMIT = 4
+LIMIT = 3
 async def run_generator(filename: str, topic: str, per_page: int):
     """Get the questions from the API"""
     extractor = get_extractor(filename)
@@ -18,9 +18,13 @@ async def run_generator(filename: str, topic: str, per_page: int):
         tasks = all_tasks[i : i + LIMIT]
         i += LIMIT
         for coro in asyncio.as_completed(tasks):
-            result = await coro
-            result = [randomize_options(entry) for entry in result]
-            yield result
+            try:
+                result = await coro
+                result = [randomize_options(entry) for entry in result]
+                yield result
+            except Exception as e:
+                print(e)
+                continue
         await asyncio.sleep(61)
 
 def randomize_options(data: Dict):
